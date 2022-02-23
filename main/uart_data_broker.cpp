@@ -1,9 +1,9 @@
 #include <esp_log.h>
 #include <cstring>
 
-#include "uart_broker.hpp"
+#include "uart_data_broker.hpp"
 
-uart_broker::uart_broker(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud, uart_port_t _port)
+uart_data_broker::uart_data_broker(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud, uart_port_t _port)
 {
     rx_pin = _rx;
     tx_pin = _tx;
@@ -11,7 +11,7 @@ uart_broker::uart_broker(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud,
     default_baud = _default_baud;
 }
 
-esp_err_t uart_broker::init()
+esp_err_t uart_data_broker::init()
 {
     uart_config_t config = {
             .baud_rate = static_cast<int>(default_baud),
@@ -30,9 +30,9 @@ esp_err_t uart_broker::init()
     return ret;
 }
 
-void uart_broker::uart_event_handler(void *_ctx)
+void uart_data_broker::uart_event_handler(void *_ctx)
 {
-    auto *ctx = static_cast<uart_broker *>(_ctx);
+    auto *ctx = static_cast<uart_data_broker *>(_ctx);
     if (ctx == nullptr) {
         ESP_LOGE(TAG, "UART broker context pointer is null!");
 
@@ -40,14 +40,11 @@ void uart_broker::uart_event_handler(void *_ctx)
     }
 
     while (true) {
-        uint8_t rx_buf[SOUL_UART_RX_BUF_SIZE] = {};
         uart_event_t event = {};
         if (xQueueReceive(ctx->evt_queue, (void *)&event, portMAX_DELAY)) {
             switch (event.type) {
                 case UART_DATA: {
-                    memset(rx_buf, 0, sizeof(rx_buf));
-                    uart_read_bytes(ctx->port, rx_buf, event.size, portMAX_DELAY);
-                    ctx->on_uart_receive(rx_buf, event.size);
+                    ctx->on_uart_incoming_data(event.size);
                     break;
                 }
 
@@ -78,12 +75,16 @@ void uart_broker::uart_event_handler(void *_ctx)
     }
 }
 
-esp_err_t uart_broker::uart_send(uint8_t *buf, size_t len) const
+esp_err_t uart_data_broker::uart_send(uint8_t *buf, size_t len) const
 {
     return uart_write_bytes(port, (void *)buf, len);
 }
 
-esp_err_t uart_broker::uart_set_baud(uint32_t baud_rate) const
+esp_err_t uart_data_broker::uart_recv(uint8_t *buf, size_t len) const
 {
-    return uart_set_baudrate(port, baud_rate);
+    size_t buffed_len = 0;
+    auto ret = uart_get_buffered_data_len(port, &buffed_len);
+    ret = ret ?: uart_read_bytes(port, buf, MIN(buffed_len, len), portMAX_DELAY);
+
+    return ret;
 }

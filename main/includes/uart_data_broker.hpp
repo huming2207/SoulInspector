@@ -9,16 +9,17 @@
 #define SOUL_UART_TX_BUF_SIZE 1024
 #define SOUL_UART_RX_BUF_SIZE 1024
 
-class uart_broker
+class uart_data_broker
 {
 public:
-    uart_broker(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud = 115200, uart_port_t _port = UART_NUM_1);
+    uart_data_broker(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud = 115200, uart_port_t _port = UART_NUM_1);
+
+    virtual esp_err_t init();
 
 protected:
-    esp_err_t init();
-    virtual esp_err_t on_uart_receive(uint8_t *buf, size_t len) = 0;
+    virtual esp_err_t on_uart_incoming_data(size_t len) = 0;
     esp_err_t uart_send(uint8_t *buf, size_t len) const;
-    esp_err_t uart_set_baud(uint32_t baud_rate) const;
+    esp_err_t uart_recv(uint8_t *buf, size_t len) const;
 
 private:
     static void uart_event_handler(void *_ctx);
