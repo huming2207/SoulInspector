@@ -14,8 +14,8 @@ public:
     esp_err_t init() override;
 
 protected:
-    void onRead(NimBLECharacteristic* pCharacteristic) override;
-    void onWrite(NimBLECharacteristic* pCharacteristic) override;
+    void onRead(NimBLECharacteristic* pCharacteristic, ble_gap_conn_desc* desc) override;
+    void onWrite(NimBLECharacteristic* pCharacteristic, ble_gap_conn_desc* desc) override;
     esp_err_t on_uart_incoming_data(size_t len) override;
 
 private:

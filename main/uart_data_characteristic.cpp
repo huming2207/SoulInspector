@@ -6,17 +6,22 @@ esp_err_t uart_data_characteristic::init()
     return uart_data_broker::init();
 }
 
-void uart_data_characteristic::onRead(NimBLECharacteristic *pCharacteristic)
+void uart_data_characteristic::onRead(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc* desc)
 {
-    static uint8_t rx_buf[SOUL_UART_RX_BUF_SIZE] = {};
-    memset(rx_buf, 0, sizeof(rx_buf));
+    uint16_t mtu = pCharacteristic->getService()->getServer()->getPeerMTU(desc->conn_handle);
+    if (mtu < BLE_ATT_MTU_DFLT) {
+        ESP_LOGW(TAG, "MTU too small: %u", mtu);
+        return;
+    }
 
-
-
-    pCharacteristic->setValue(rx_buf, )
+    size_t rx_len = mtu - 3;
+    auto *rx_buf = (uint8_t *)calloc(1, rx_len);
+    if (uart_recv(rx_buf, rx_len) == ESP_OK) {
+        pCharacteristic->setValue(rx_buf, rx_len);
+    }
 }
 
-void uart_data_characteristic::onWrite(NimBLECharacteristic *pCharacteristic)
+void uart_data_characteristic::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc* desc)
 {
     NimBLECharacteristicCallbacks::onWrite(pCharacteristic);
 }
