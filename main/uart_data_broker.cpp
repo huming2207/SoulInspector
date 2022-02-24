@@ -1,5 +1,6 @@
 #include <esp_log.h>
 #include <cstring>
+#include <sys/param.h>
 
 #include "uart_data_broker.hpp"
 
@@ -83,8 +84,14 @@ esp_err_t uart_data_broker::uart_send(uint8_t *buf, size_t len) const
 esp_err_t uart_data_broker::uart_recv(uint8_t *buf, size_t len) const
 {
     size_t buffed_len = 0;
-    auto ret = uart_get_buffered_data_len(port, &buffed_len);
-    ret = ret ?: uart_read_bytes(port, buf, MIN(buffed_len, len), portMAX_DELAY);
+    uart_get_buffered_data_len(port, &buffed_len);
 
-    return ret;
+    size_t read_len = MIN(buffed_len, len);
+    if (read_len < 1) {
+        ESP_LOGW(TAG, "Read length too short: %u %u %u", read_len, buffed_len, len);
+        return ESP_ERR_INVALID_SIZE;
+    }
+
+    uart_read_bytes(port, buf, read_len, portMAX_DELAY);
+    return ESP_OK;
 }
