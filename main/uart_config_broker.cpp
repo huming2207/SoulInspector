@@ -8,9 +8,12 @@ uart_config_broker::uart_config_broker(gpio_num_t _rx, gpio_num_t _tx, uint32_t 
     port = _port;
 }
 
-
-esp_err_t uart_config_broker::uart_set_baud(uint32_t baud_rate)
+void uart_config_broker::onRead(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc)
 {
-    baud = baud_rate;
-    return uart_set_baudrate(port, baud);
+
+}
+
+void uart_config_broker::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc)
+{
+    NimBLECharacteristicCallbacks::onWrite(pCharacteristic, desc);
 }
