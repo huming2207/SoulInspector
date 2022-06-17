@@ -1,10 +1,10 @@
 idf_component_register(
         SRCS
             "si_main.cpp"
-            "uart_data_broker.cpp" "includes/uart_data_broker.hpp"
-            "uart_config_broker.cpp" "includes/uart_config_broker.hpp"
-            "uart_data_characteristic.cpp" "includes/uart_data_characteristic.hpp"
+            "driver/uart_data_broker.cpp" "driver/uart_data_broker.hpp"
+            "storage/config_manager.cpp" "storage/config_manager.hpp"
+            "misc/eternal.hpp"
 
         INCLUDE_DIRS
-            "includes"
+            "driver" "storage" "protocol" "misc"
 )
