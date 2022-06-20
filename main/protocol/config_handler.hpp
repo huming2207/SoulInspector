@@ -11,6 +11,8 @@ namespace pkt
         CONFIG_NEG_I32 = 2,
         CONFIG_STR = 3,
         CONFIG_BLOB = 4,
+        CONFIG_DELETE = 0xa0,
+        CONFIG_NUKE = 0xa1,
         CONFIG_OK = 0xf0,
         CONFIG_ERROR_NOT_FOUND = 0xf1,
         CONFIG_ERROR_INVALID_SIZE = 0xf2,
@@ -37,7 +39,7 @@ namespace pkt
     };
 }
 
-class config_writer : NimBLECharacteristicCallbacks
+class config_writer : public NimBLECharacteristicCallbacks
 {
 private:
     void onWrite(NimBLECharacteristic* pCharacteristic, ble_gap_conn_desc* desc) override;
@@ -47,7 +49,7 @@ private:
     static const constexpr char *TAG = "config_writer";
 };
 
-class config_reader : NimBLECharacteristicCallbacks
+class config_reader : public NimBLECharacteristicCallbacks
 {
 private:
     void onWrite(NimBLECharacteristic* pCharacteristic, ble_gap_conn_desc* desc) override;
@@ -56,3 +58,4 @@ private:
     static const constexpr char SIMPLE_ACK_MAGIC[] = "JingHouJiaYin";
     static const constexpr char *TAG = "config_writer";
 };
+

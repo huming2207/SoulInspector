@@ -110,7 +110,22 @@ void config_writer::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_
             pCharacteristic->notify((uint8_t *)&ack, sizeof(ack), true);
             break;
         }
-
+        case pkt::CONFIG_DELETE: {
+            auto *pkt = (pkt::cfg_key_pkt *)data;
+            auto ret = cfg_mgr.erase(pkt->key);
+            pkt::cfg_key_pkt ack = {};
+            ack.type = ret == ESP_OK ? pkt::CONFIG_OK : pkt::CONFIG_ERROR_GENERIC;
+            memcpy(ack.key, pkt->key, sizeof(ack.key));
+            pCharacteristic->notify((uint8_t *)&ack, sizeof(ack), true);
+            break;
+        }
+        case pkt::CONFIG_NUKE: {
+            auto ret = cfg_mgr.nuke();
+            pkt::cfg_key_pkt ack = {};
+            ack.type = ret == ESP_OK ? pkt::CONFIG_OK : pkt::CONFIG_ERROR_GENERIC;
+            pCharacteristic->notify((uint8_t *)&ack, sizeof(ack), true);
+            break;
+        }
         default: {
             pkt::cfg_key_pkt ack = {};
             ack.type = pkt::CONFIG_ERROR_UNKNOWN_TYPE;
