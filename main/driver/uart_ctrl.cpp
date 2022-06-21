@@ -2,9 +2,9 @@
 #include <cstring>
 #include <sys/param.h>
 
-#include "uart_data_broker.hpp"
+#include "uart_ctrl.hpp"
 
-uart_data_broker::uart_data_broker(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud, uart_port_t _port)
+uart_ctrl::uart_ctrl(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud, uart_port_t _port)
 {
     rx_pin = _rx;
     tx_pin = _tx;
@@ -12,14 +12,14 @@ uart_data_broker::uart_data_broker(gpio_num_t _rx, gpio_num_t _tx, uint32_t _def
     default_baud = _default_baud;
 }
 
-esp_err_t uart_data_broker::init()
+esp_err_t uart_ctrl::init()
 {
     uart_config_t config = {
             .baud_rate = static_cast<int>(default_baud),
             .data_bits = UART_DATA_8_BITS,
             .stop_bits = UART_STOP_BITS_1,
             .flow_ctrl = UART_HW_FLOWCTRL_DISABLE,
-            .source_clk = UART_SCLK_APB,
+            .source_clk = UART_SCLK_RTC,
     };
 
     auto ret = uart_driver_install(port, SOUL_UART_RX_BUF_SIZE, SOUL_UART_TX_BUF_SIZE, 20, &evt_queue, 0);
@@ -31,9 +31,9 @@ esp_err_t uart_data_broker::init()
     return ret;
 }
 
-void uart_data_broker::uart_event_handler(void *_ctx)
+void uart_ctrl::uart_event_handler(void *_ctx)
 {
-    auto *ctx = static_cast<uart_data_broker *>(_ctx);
+    auto *ctx = static_cast<uart_ctrl *>(_ctx);
     if (ctx == nullptr) {
         ESP_LOGE(TAG, "UART broker context pointer is null!");
 
@@ -76,12 +76,12 @@ void uart_data_broker::uart_event_handler(void *_ctx)
     }
 }
 
-esp_err_t uart_data_broker::uart_send(uint8_t *buf, size_t len) const
+esp_err_t uart_ctrl::uart_send(uint8_t *buf, size_t len) const
 {
     return uart_write_bytes(port, (void *)buf, len);
 }
 
-esp_err_t uart_data_broker::uart_recv(uint8_t *buf, size_t len) const
+esp_err_t uart_ctrl::uart_recv(uint8_t *buf, size_t len) const
 {
     size_t buffed_len = 0;
     uart_get_buffered_data_len(port, &buffed_len);

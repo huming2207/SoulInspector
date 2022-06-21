@@ -7,12 +7,12 @@
 #include <driver/uart.h>
 
 #define SOUL_UART_TX_BUF_SIZE 1024
-#define SOUL_UART_RX_BUF_SIZE 1024
+#define SOUL_UART_RX_BUF_SIZE 8192
 
-class uart_data_broker
+class uart_ctrl
 {
 public:
-    uart_data_broker(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud = 115200, uart_port_t _port = UART_NUM_1);
+    uart_ctrl(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud = 115200, uart_port_t _port = UART_NUM_1);
 
     virtual esp_err_t init();
 
