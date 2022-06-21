@@ -3,17 +3,17 @@
 #include <sys/param.h>
 
 #include "uart_ctrl.hpp"
+#include "config_manager.hpp"
 
-uart_ctrl::uart_ctrl(gpio_num_t _rx, gpio_num_t _tx, uint32_t _default_baud, uart_port_t _port)
+esp_err_t uart_ctrl::init(gpio_num_t _rx, gpio_num_t _tx, gpio_num_t _rts, gpio_num_t _cts, uint32_t _default_baud, uart_port_t _port)
 {
     rx_pin = _rx;
     tx_pin = _tx;
-    port = _port;
+    rts_pin = _rts;
+    cts_pin = _cts;
     default_baud = _default_baud;
-}
+    port = _port;
 
-esp_err_t uart_ctrl::init()
-{
     uart_config_t config = {
             .baud_rate = static_cast<int>(default_baud),
             .data_bits = UART_DATA_8_BITS,
@@ -22,11 +22,17 @@ esp_err_t uart_ctrl::init()
             .source_clk = UART_SCLK_RTC,
     };
 
-    auto ret = uart_driver_install(port, SOUL_UART_RX_BUF_SIZE, SOUL_UART_TX_BUF_SIZE, 20, &evt_queue, 0);
-    ret = ret ?: uart_param_config(port, &config);
-    ret = ret ?: uart_set_pin(port, tx_pin, rx_pin, -1, -1);
+    auto ret = load_uart_config(&config);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "Failed to load config: 0x%x", ret);
+        return ret;
+    }
 
-    xTaskCreate(uart_event_handler, "si_uart_evt", 8192, nullptr, tskIDLE_PRIORITY + 5, nullptr);
+    ret = uart_driver_install(port, SOUL_UART_RX_BUF_SIZE, SOUL_UART_TX_BUF_SIZE, 20, &evt_queue, 0);
+    ret = ret ?: uart_param_config(port, &config);
+    ret = ret ?: uart_set_pin(port, tx_pin, rx_pin, rts_pin, cts_pin);
+
+    xTaskCreate(uart_event_handler, "si_uart_evt", 8192, this, tskIDLE_PRIORITY + 5, &evt_task_handle);
 
     return ret;
 }
@@ -36,7 +42,6 @@ void uart_ctrl::uart_event_handler(void *_ctx)
     auto *ctx = static_cast<uart_ctrl *>(_ctx);
     if (ctx == nullptr) {
         ESP_LOGE(TAG, "UART broker context pointer is null!");
-
         return;
     }
 
@@ -45,7 +50,7 @@ void uart_ctrl::uart_event_handler(void *_ctx)
         if (xQueueReceive(ctx->evt_queue, (void *)&event, portMAX_DELAY)) {
             switch (event.type) {
                 case UART_DATA: {
-                    ctx->on_uart_incoming_data(event.size);
+                    if (ctx->on_incoming_data) ctx->on_incoming_data(event.size);
                     break;
                 }
 
@@ -94,4 +99,48 @@ esp_err_t uart_ctrl::uart_recv(uint8_t *buf, size_t len) const
 
     uart_read_bytes(port, buf, read_len, portMAX_DELAY);
     return ESP_OK;
+}
+
+void uart_ctrl::set_incoming_data_cb(const std::function<void(size_t)> &cb)
+{
+    on_incoming_data = cb;
+}
+
+esp_err_t uart_ctrl::load_uart_config(uart_config_t *cfg)
+{
+    if (cfg == nullptr) {
+        return ESP_ERR_INVALID_ARG;
+    }
+
+    auto &cfg_mgr = config_manager::instance();
+    uint32_t baud = 0, stop_bit = 0, data_bit = 0, parity = 0;
+    auto ret = cfg_mgr.get_u32(config::UART_BAUD, baud);
+    ret = ret ?: cfg_mgr.get_u32(config::UART_STOP, stop_bit);
+    ret = ret ?: cfg_mgr.get_u32(config::UART_DATA, data_bit);
+    ret = ret ?: cfg_mgr.get_u32(config::UART_PARITY, parity);
+
+    if (ret != ESP_OK) {
+        ESP_LOGW(TAG, "Failed to load config, writing default config...");
+        ret = cfg_mgr.set_u32(config::UART_BAUD, cfg->baud_rate);
+        ret = ret ?: cfg_mgr.set_u32(config::UART_STOP, cfg->stop_bits);
+        ret = ret ?: cfg_mgr.set_u32(config::UART_DATA, cfg->data_bits);
+        ret = ret ?: cfg_mgr.set_u32(config::UART_PARITY, cfg->parity);
+
+        if (ret != ESP_OK) {
+            ESP_LOGE(TAG, "Init default setting failed");
+            return ESP_ERR_INVALID_STATE;
+        } else {
+            ret = cfg_mgr.get_u32(config::UART_BAUD, baud);
+            ret = ret ?: cfg_mgr.get_u32(config::UART_STOP, stop_bit);
+            ret = ret ?: cfg_mgr.get_u32(config::UART_DATA, data_bit);
+            ret = ret ?: cfg_mgr.get_u32(config::UART_PARITY, parity);
+        }
+    }
+
+    return ret;
+}
+
+esp_err_t uart_ctrl::deinit() const
+{
+    return uart_driver_delete(port);
 }
