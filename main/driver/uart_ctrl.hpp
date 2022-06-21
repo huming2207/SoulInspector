@@ -25,7 +25,8 @@ public:
 public:
     esp_err_t init(gpio_num_t _rx, gpio_num_t _tx, gpio_num_t _rts = GPIO_NUM_NC,
                    gpio_num_t _cts = GPIO_NUM_NC, uint32_t _default_baud = 115200, uart_port_t _port = UART_NUM_1);
-    [[nodiscard]] esp_err_t deinit() const;
+    esp_err_t deinit();
+    [[nodiscard]] bool inited() const;
     static esp_err_t load_uart_config(uart_config_t *cfg);
 
 protected:
@@ -38,6 +39,7 @@ private:
     static void uart_event_handler(void *_ctx);
 
 private:
+    bool has_inited = false;
     uart_port_t port = UART_NUM_1;
     uint32_t default_baud = 115200;
     gpio_num_t rx_pin = GPIO_NUM_NC;

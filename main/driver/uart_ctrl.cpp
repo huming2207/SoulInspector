@@ -31,9 +31,18 @@ esp_err_t uart_ctrl::init(gpio_num_t _rx, gpio_num_t _tx, gpio_num_t _rts, gpio_
     ret = uart_driver_install(port, SOUL_UART_RX_BUF_SIZE, SOUL_UART_TX_BUF_SIZE, 20, &evt_queue, 0);
     ret = ret ?: uart_param_config(port, &config);
     ret = ret ?: uart_set_pin(port, tx_pin, rx_pin, rts_pin, cts_pin);
+    if (ret != ESP_OK) {
+        ESP_LOGE(TAG, "UART init failed: 0x%x", ret);
+        return ret;
+    }
 
-    xTaskCreate(uart_event_handler, "si_uart_evt", 8192, this, tskIDLE_PRIORITY + 5, &evt_task_handle);
+    auto task_ret = xTaskCreate(uart_event_handler, "si_uart_evt", 8192, this, tskIDLE_PRIORITY + 5, &evt_task_handle);
+    if (task_ret != pdPASS) {
+        ESP_LOGE(TAG, "Failed to create UART event handler task");
+        return ESP_ERR_NO_MEM;
+    }
 
+    has_inited = true;
     return ret;
 }
 
@@ -140,7 +149,13 @@ esp_err_t uart_ctrl::load_uart_config(uart_config_t *cfg)
     return ret;
 }
 
-esp_err_t uart_ctrl::deinit() const
+esp_err_t uart_ctrl::deinit()
 {
+    has_inited = false;
     return uart_driver_delete(port);
+}
+
+bool uart_ctrl::inited() const
+{
+    return has_inited;
 }
