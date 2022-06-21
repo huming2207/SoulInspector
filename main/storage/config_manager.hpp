@@ -5,6 +5,7 @@
 #include <nvs_handle.hpp>
 
 #include "eternal.hpp"
+#include "config_constants.hpp"
 
 #define CFG_MGR_NVS_NAMESPACE "soulinspector"
 
@@ -46,18 +47,13 @@ private:
     std::shared_ptr<nvs::NVSHandle> nvs_handle = nullptr;
     static constexpr const auto key_attr = mapbox::eternal::map<mapbox::eternal::string, uint8_t>(
         {
-                {"NET_WIFI_SSID", ((config::ENTRY_STR & 0xf) | (config::POLICY_EXT_UNREADABLE << 4))},
-                {"NET_WIFI_PASS", ((config::ENTRY_STR & 0xf) | (config::POLICY_EXT_UNREADABLE << 4))},
-                {"NET_API_ENDPT", (config::ENTRY_STR & 0xf)},
-                {"CDC_USB_TMP_OFF", (config::ENTRY_U32 & 0xf)},
-                {"UART_1_BAUD", (config::ENTRY_U32 & 0xf)},
-                {"UART_1_STOP", (config::ENTRY_U32 & 0xf)},
-                {"UART_1_DATA", (config::ENTRY_U32 & 0xf)},
-                {"UART_1_PARITY", (config::ENTRY_U32 & 0xf)},
-                {"UART_2_BAUD", (config::ENTRY_U32 & 0xf)},
-                {"UART_2_STOP", (config::ENTRY_U32 & 0xf)},
-                {"UART_2_DATA", (config::ENTRY_U32 & 0xf)},
-                {"UART_2_PARITY", (config::ENTRY_U32 & 0xf)},
+                {config::WIFI_SSID, ((config::ENTRY_STR & 0xf) | (config::POLICY_EXT_UNREADABLE << 4))},
+                {config::WIFI_PASSWD, ((config::ENTRY_STR & 0xf) | (config::POLICY_EXT_UNREADABLE << 4))},
+                {config::USB_SWITCH, (config::ENTRY_U32 & 0xf)},
+                {config::UART_BAUD, (config::ENTRY_U32 & 0xf)},
+                {config::UART_STOP, (config::ENTRY_U32 & 0xf)},
+                {config::UART_DATA, (config::ENTRY_U32 & 0xf)},
+                {config::UART_PARITY, (config::ENTRY_U32 & 0xf)},
         }
     );
 
