@@ -56,6 +56,6 @@ private:
 
 private:
     static const constexpr char SIMPLE_ACK_MAGIC[] = "JingHouJiaYin";
-    static const constexpr char *TAG = "config_writer";
+    static const constexpr char *TAG = "config_reader";
 };
 

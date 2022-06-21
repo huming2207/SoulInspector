@@ -111,6 +111,13 @@ void config_writer::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_
             break;
         }
         case pkt::CONFIG_DELETE: {
+            if (value.length() < sizeof(pkt::cfg_key_pkt)) {
+                pkt::cfg_key_pkt ack = {};
+                ack.type = pkt::CONFIG_ERROR_INVALID_SIZE;
+                pCharacteristic->notify((uint8_t *)&ack, sizeof(ack), true);
+                return;
+            }
+
             auto *pkt = (pkt::cfg_key_pkt *)data;
             auto ret = cfg_mgr.erase(pkt->key);
             pkt::cfg_key_pkt ack = {};
