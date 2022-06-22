@@ -2,6 +2,7 @@
 #include "ble_manager.hpp"
 #include "NimBLEDevice.h"
 #include "config_handler.hpp"
+#include "uart_handler.hpp"
 
 esp_err_t ble_manager::init()
 {
@@ -27,6 +28,9 @@ esp_err_t ble_manager::init()
 
     auto config_write_char = ble_service->createCharacteristic(CONFIG_WRITER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     config_write_char->setCallbacks(new config_writer);
+
+    auto uart_rx_char = ble_service->createCharacteristic(UART_RX_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ_ENC | NIMBLE_PROPERTY::NOTIFY);
+    uart_rx_char->setCallbacks(new uart_rx_handler);
 
     if (!ble_service->start()) {
         ESP_LOGE(TAG, "Failed to start BLE GATT service");

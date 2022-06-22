@@ -19,6 +19,8 @@ public:
     static const constexpr char *SERVICE_UUID = "6ae00001-efc9-11ec-8ea0-0242ac120002";
     static const constexpr char *CONFIG_READER_CHARACTERISTIC_UUID = "6ae00002-efc9-11ec-8ea0-0242ac120002";
     static const constexpr char *CONFIG_WRITER_CHARACTERISTIC_UUID = "6ae00003-efc9-11ec-8ea0-0242ac120002";
+    static const constexpr char *UART_RX_HANDLER_CHARACTERISTIC_UUID = "6ae00004-efc9-11ec-8ea0-0242ac120002";
+    static const constexpr char *UART_TX_HANDLER_CHARACTERISTIC_UUID = "6ae00005-efc9-11ec-8ea0-0242ac120002";
 
 public:
     esp_err_t init();
