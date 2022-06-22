@@ -159,3 +159,13 @@ bool uart_ctrl::inited() const
 {
     return has_inited;
 }
+
+size_t uart_ctrl::get_rx_buf_len() const
+{
+    size_t len = 0;
+    if (uart_get_buffered_data_len(port, &len) != ESP_OK) {
+        return 0;
+    }
+
+    return len;
+}

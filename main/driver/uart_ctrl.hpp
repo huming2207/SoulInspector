@@ -31,6 +31,7 @@ public:
     void set_incoming_data_cb(const std::function<void(size_t)> &cb);
     esp_err_t uart_send(uint8_t *buf, size_t len) const;
     esp_err_t uart_recv(uint8_t *buf, size_t len) const;
+    [[nodiscard]] size_t get_rx_buf_len() const;
 
 private:
     uart_ctrl() = default;
