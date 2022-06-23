@@ -29,8 +29,11 @@ esp_err_t ble_manager::init()
     auto config_write_char = ble_service->createCharacteristic(CONFIG_WRITER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     config_write_char->setCallbacks(new config_writer);
 
-    auto uart_rx_char = ble_service->createCharacteristic(UART_RX_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::READ_ENC | NIMBLE_PROPERTY::NOTIFY);
+    auto uart_rx_char = ble_service->createCharacteristic(UART_RX_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::READ_ENC | NIMBLE_PROPERTY::NOTIFY);
     uart_rx_char->setCallbacks(new uart_rx_handler);
+
+    auto uart_tx_char = ble_service->createCharacteristic(UART_RX_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_ENC | NIMBLE_PROPERTY::NOTIFY);
+    uart_tx_char->setCallbacks(new uart_tx_handler);
 
     if (!ble_service->start()) {
         ESP_LOGE(TAG, "Failed to start BLE GATT service");

@@ -42,3 +42,13 @@ private:
     NimBLECharacteristic* characteristic = nullptr;
 };
 
+class uart_tx_handler : public NimBLECharacteristicCallbacks
+{
+public:
+    void onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, uint16_t subValue) override;
+    void onWrite(NimBLECharacteristic* pCharacteristic, ble_gap_conn_desc* desc) override;
+
+private:
+    static const constexpr char *TAG = "uart_tx_handler";
+    NimBLECharacteristic* characteristic = nullptr;
+};

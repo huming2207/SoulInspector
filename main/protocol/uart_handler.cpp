@@ -66,3 +66,13 @@ void uart_rx_handler::on_uart_data_available(size_t len)
         characteristic->notify((uint8_t *)&pkt, sizeof(uart_handler::length_pkt));
     }
 }
+
+void uart_tx_handler::onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, uint16_t subValue)
+{
+    NimBLECharacteristicCallbacks::onSubscribe(pCharacteristic, desc, subValue);
+}
+
+void uart_tx_handler::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc)
+{
+    NimBLECharacteristicCallbacks::onWrite(pCharacteristic, desc);
+}
