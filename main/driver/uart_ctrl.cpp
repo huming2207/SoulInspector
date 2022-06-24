@@ -90,12 +90,12 @@ void uart_ctrl::uart_event_handler(void *_ctx)
     }
 }
 
-esp_err_t uart_ctrl::uart_send(uint8_t *buf, size_t len) const
+size_t uart_ctrl::send(uint8_t *buf, size_t len) const
 {
     return uart_write_bytes(port, (void *)buf, len);
 }
 
-esp_err_t uart_ctrl::uart_recv(uint8_t *buf, size_t len) const
+esp_err_t uart_ctrl::receive(uint8_t *buf, size_t len) const
 {
     size_t buffed_len = 0;
     uart_get_buffered_data_len(port, &buffed_len);
