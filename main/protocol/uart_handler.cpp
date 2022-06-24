@@ -10,13 +10,14 @@ void uart_rx_handler::onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap
 
     if (subValue == 0 && uart.inited()) {
         uart.deinit();
-    } else {
+    } else if (!uart.inited()) {
         uart.init();
-        characteristic = pCharacteristic;
-        uart.set_incoming_data_cb([&](size_t len){
-            on_uart_data_available(len);
-        });
     }
+
+    characteristic = pCharacteristic;
+    uart.set_incoming_data_cb([&](size_t len){
+        on_uart_data_available(len);
+    });
 }
 
 void uart_rx_handler::onRead(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc)
@@ -33,7 +34,7 @@ void uart_rx_handler::onRead(NimBLECharacteristic *pCharacteristic, ble_gap_conn
 
     size_t mtu = pCharacteristic->getService()->getServer()->getPeerMTU(desc->conn_handle) - 2;
     size_t read_len = std::min(std::min(sizeof(read_buf), mtu), uart.get_rx_buf_len());
-    if (uart.uart_recv(read_buf, read_len) != ESP_OK) {
+    if (uart.receive(read_buf, read_len) != ESP_OK) {
         ESP_LOGE(TAG, "Failed to read from UART, len %d", read_len);
         return;
     }
@@ -56,7 +57,7 @@ void uart_rx_handler::on_uart_data_available(size_t len)
         uart_handler::data_pkt pkt = {};
         pkt.type = uart_handler::UART_PKT_DATA;
         pkt.len = len;
-        uart.uart_recv(pkt.data, len);
+        uart.receive(pkt.data, len);
         characteristic->notify((uint8_t *)&pkt, std::min((size_t)(len + 2), (size_t)20)); // 2 bytes of packet type + length
     } else {
         uart_handler::length_pkt pkt = {};
@@ -67,12 +68,16 @@ void uart_rx_handler::on_uart_data_available(size_t len)
     }
 }
 
-void uart_tx_handler::onSubscribe(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc, uint16_t subValue)
-{
-    NimBLECharacteristicCallbacks::onSubscribe(pCharacteristic, desc, subValue);
-}
-
 void uart_tx_handler::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc)
 {
     NimBLECharacteristicCallbacks::onWrite(pCharacteristic, desc);
+
+    auto &uart = uart_ctrl::instance();
+    if (!uart.inited()) {
+        uart.init();
+    }
+
+    auto value = pCharacteristic->getValue();
+    auto sent_len = uart.send((uint8_t *) (value.data()), value.length());
+    pCharacteristic->notify((uint8_t *)&sent_len, sizeof(sent_len));
 }
