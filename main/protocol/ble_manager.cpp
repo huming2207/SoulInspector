@@ -42,6 +42,7 @@ esp_err_t ble_manager::init()
 
     ESP_LOGI(TAG, "GATT service started");
 
+    ble_server->getAdvertising()->addServiceUUID(SERVICE_UUID);
     if (!ble_server->getAdvertising()->start()) {
         ESP_LOGE(TAG, "Failed to start advertising");
         return ESP_FAIL;
