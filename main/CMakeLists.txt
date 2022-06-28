@@ -8,6 +8,7 @@ idf_component_register(
             "protocol/chunk_codec.cpp" "protocol/chunk_codec.hpp"
             "protocol/config_handler.cpp" "protocol/config_handler.hpp"
             "protocol/uart_handler.cpp" "protocol/uart_handler.hpp"
+            "protocol/time_sync_handler.cpp" "protocol/time_sync_handler.hpp"
 
         INCLUDE_DIRS
             "driver" "storage" "protocol" "misc"
