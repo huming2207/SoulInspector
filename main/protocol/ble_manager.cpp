@@ -3,6 +3,7 @@
 #include "NimBLEDevice.h"
 #include "config_handler.hpp"
 #include "uart_handler.hpp"
+#include "time_sync_handler.hpp"
 
 esp_err_t ble_manager::init()
 {
@@ -34,6 +35,9 @@ esp_err_t ble_manager::init()
 
     auto uart_tx_char = ble_service->createCharacteristic(UART_RX_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_ENC | NIMBLE_PROPERTY::NOTIFY);
     uart_tx_char->setCallbacks(new uart_tx_handler);
+
+    auto time_sync_char = ble_service->createCharacteristic(TIME_SYNC_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    time_sync_char->setCallbacks(new time_sync_handler);
 
     if (!ble_service->start()) {
         ESP_LOGE(TAG, "Failed to start BLE GATT service");
