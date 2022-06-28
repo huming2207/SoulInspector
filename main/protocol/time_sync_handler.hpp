@@ -6,4 +6,7 @@ class time_sync_handler : public NimBLECharacteristicCallbacks
 {
 public:
     void onWrite(NimBLECharacteristic* pCharacteristic, ble_gap_conn_desc* desc) override;
+
+private:
+    static const constexpr char *TAG = "time_sync";
 };

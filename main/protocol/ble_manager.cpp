@@ -33,10 +33,10 @@ esp_err_t ble_manager::init()
     auto uart_rx_char = ble_service->createCharacteristic(UART_RX_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ | NIMBLE_PROPERTY::READ_ENC | NIMBLE_PROPERTY::NOTIFY);
     uart_rx_char->setCallbacks(new uart_rx_handler);
 
-    auto uart_tx_char = ble_service->createCharacteristic(UART_RX_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_ENC | NIMBLE_PROPERTY::NOTIFY);
+    auto uart_tx_char = ble_service->createCharacteristic(UART_TX_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_ENC | NIMBLE_PROPERTY::NOTIFY);
     uart_tx_char->setCallbacks(new uart_tx_handler);
 
-    auto time_sync_char = ble_service->createCharacteristic(TIME_SYNC_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
+    auto time_sync_char = ble_service->createCharacteristic(TIME_SYNC_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::WRITE_ENC| NIMBLE_PROPERTY::NOTIFY);
     time_sync_char->setCallbacks(new time_sync_handler);
 
     if (!ble_service->start()) {

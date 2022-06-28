@@ -1,3 +1,4 @@
+#include <esp_log.h>
 #include "time_sync_handler.hpp"
 
 void time_sync_handler::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_conn_desc *desc)
@@ -7,7 +8,7 @@ void time_sync_handler::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_c
     auto data = pCharacteristic->getValue().data();
     auto len = pCharacteristic->getDataLength();
 
-    if (len != 8 || data == nullptr) return;
+    if (len != 4 || data == nullptr) return;
 
     uint32_t ts_sec = ((data[0]) | (data[1] << 8u) | (data[2] << 16u) | (data[3] << 24u));
 
@@ -21,5 +22,6 @@ void time_sync_handler::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_c
     // Read it back...
     gettimeofday(&tv, &tz);
 
+    ESP_LOGI(TAG, "Got timestamp: %u %u", tv.tv_sec, ts_sec);
     pCharacteristic->notify((uint8_t *)&tv.tv_sec, sizeof(tv.tv_sec));
 }
