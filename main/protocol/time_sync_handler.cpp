@@ -5,12 +5,7 @@ void time_sync_handler::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_c
 {
     NimBLECharacteristicCallbacks::onWrite(pCharacteristic, desc);
 
-    auto data = pCharacteristic->getValue().data();
-    auto len = pCharacteristic->getDataLength();
-
-    if (len != 4 || data == nullptr) return;
-
-    uint32_t ts_sec = ((data[0]) | (data[1] << 8u) | (data[2] << 16u) | (data[3] << 24u));
+    auto ts_sec = pCharacteristic->getValue<uint32_t>();
 
     struct timeval tv = {};
     struct timezone tz = {};
@@ -19,9 +14,7 @@ void time_sync_handler::onWrite(NimBLECharacteristic *pCharacteristic, ble_gap_c
 
     settimeofday(&tv, &tz);
 
-    // Read it back...
-    gettimeofday(&tv, &tz);
-
-    ESP_LOGI(TAG, "Got timestamp: %u %u", tv.tv_sec, ts_sec);
-    pCharacteristic->notify((uint8_t *)&tv.tv_sec, sizeof(tv.tv_sec));
+    time_t ts = time(nullptr);
+    ESP_LOGI(TAG, "Got timestamp: %u %lld", ts_sec, ts);
+    pCharacteristic->notify((uint8_t *)&ts, sizeof(ts));
 }
