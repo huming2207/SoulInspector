@@ -28,8 +28,8 @@ namespace pkt
 
     struct __attribute__((packed)) blob_str_cfg_pkt {
         config_ops type;
-        uint8_t len;
         char key[16];
+        uint8_t len;
         uint8_t data[128];
     };
 
