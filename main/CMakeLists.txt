@@ -9,6 +9,7 @@ idf_component_register(
             "protocol/config_handler.cpp" "protocol/config_handler.hpp"
             "protocol/uart_handler.cpp" "protocol/uart_handler.hpp"
             "protocol/time_sync_handler.cpp" "protocol/time_sync_handler.hpp"
+            "protocol/dev_info_handler.cpp" "protocol/dev_info_handler.hpp"
 
         INCLUDE_DIRS
             "driver" "storage" "protocol" "misc"
