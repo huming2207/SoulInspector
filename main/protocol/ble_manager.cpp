@@ -4,6 +4,7 @@
 #include "config_handler.hpp"
 #include "uart_handler.hpp"
 #include "time_sync_handler.hpp"
+#include "dev_info_handler.hpp"
 
 esp_err_t ble_manager::init()
 {
@@ -38,6 +39,9 @@ esp_err_t ble_manager::init()
 
     auto time_sync_char = ble_service->createCharacteristic(TIME_SYNC_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::WRITE | NIMBLE_PROPERTY::NOTIFY);
     time_sync_char->setCallbacks(new time_sync_handler);
+
+    auto dev_info_char = ble_service->createCharacteristic(DEV_INFO_HANDLER_CHARACTERISTIC_UUID, NIMBLE_PROPERTY::READ);
+    dev_info_char->setCallbacks(new dev_info_handler);
 
     if (!ble_service->start()) {
         ESP_LOGE(TAG, "Failed to start BLE GATT service");

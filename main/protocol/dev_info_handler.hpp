@@ -3,6 +3,10 @@
 #include <cstdint>
 #include "NimBLECharacteristic.h"
 
+#ifndef PROJECT_VER
+#define PROJECT_VER "v0.0.0-unknown"
+#endif
+
 namespace dev_info
 {
     struct __attribute__((packed)) device_info {

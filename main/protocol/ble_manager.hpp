@@ -22,6 +22,7 @@ public:
     static const constexpr char *UART_RX_HANDLER_CHARACTERISTIC_UUID = "6ae00004-efc9-11ec-8ea0-0242ac120002";
     static const constexpr char *UART_TX_HANDLER_CHARACTERISTIC_UUID = "6ae00005-efc9-11ec-8ea0-0242ac120002";
     static const constexpr char *TIME_SYNC_HANDLER_CHARACTERISTIC_UUID = "6ae00006-efc9-11ec-8ea0-0242ac120002";
+    static const constexpr char *DEV_INFO_HANDLER_CHARACTERISTIC_UUID = "6ae00007-efc9-11ec-8ea0-0242ac120002";
 
 public:
     esp_err_t init();
